@@ -1,6 +1,6 @@
 import pygame
 import os
-from sys import exit
+import random
 
 pygame.init()
 
@@ -32,7 +32,7 @@ class Dino:
     x_pos = 80
     y_pos = 310
     y_pos_abaixado = 340
-    pulando_vel = 8.5
+    pulando_vel_const = 8.5
 
     def __init__(self):
         self.dino_abaixado_img = abaixado
@@ -44,7 +44,7 @@ class Dino:
         self.dino_pulando = False
 
         self.step_index = 0
-        self.pulando_vel = self.pulando_vel
+        self.pulando_vel = self.pulando_vel_const
         self.image = self.dino_correndo_img[0]
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.x_pos
@@ -63,22 +63,22 @@ class Dino:
 
         if userInput[pygame.K_UP] and not self.dino_pulando:
             self.dino_abaixado = False
-            self.dino_corendo = False
+            self.dino_correndo = False
             self.dino_pulando = True
         elif userInput[pygame.K_DOWN] and not self.dino_pulando:
             self.dino_abaixado = True
-            self.dino_corendo = False
+            self.dino_correndo = False
             self.dino_pulando = False
         elif not (self.dino_pulando or userInput[pygame.K_DOWN]):
             self.dino_abaixado = False
-            self.dino_corendo = True
+            self.dino_correndo = True
             self.dino_pulando = False
 
     def abaixado(self):
-        self.image = self.abaixado_img[self.step_index // 5]
+        self.image = self.dino_abaixado_img[self.step_index // 5]
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.x_pos
-        self.dino_rect.y = self.y_pos
+        self.dino_rect.y = self.y_pos_abaixado
         self.step_index += 1
 
     def correndo(self):
@@ -89,11 +89,13 @@ class Dino:
         self.step_index += 1
 
     def pulando(self):
-        self.image = self.dino_correndo_img[self.step_index // 5]
-        self.dino_rect = self.image.get_rect()
-        self.dino_rect.x = self.x_pos
-        self.dino_rect.y = self.y_pos
-        self.step_index += 1
+        self.image = self.dino_pulando_img
+        if self.dino_pulando:
+            self.dino_rect.y -= self.pulando_vel * 4
+            self.pulando_vel -= 0.8
+            if self.pulando_vel < - self.pulando_vel_const:
+                self.dino_pulando = False
+                self.pulando_vel = self.pulando_vel_const
 
     def draw(self, tela):
         tela.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
