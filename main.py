@@ -4,7 +4,9 @@ import random
 
 pygame.init()
 
-tela = pygame.display.set_mode((1100, 600))
+tela_largura = 1100
+tela_altura = 600
+tela = pygame.display.set_mode((tela_largura, tela_altura))
 
 correndo = [pygame.image.load(os.path.join(
     "Assets/Dino", "DinoRun1.png")), pygame.image.load(os.path.join("Assets/Dino", "DinoRun2.png"))]
@@ -23,7 +25,7 @@ cacto_grande = [pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus1.pn
 passaro = [pygame.image.load(os.path.join("Assets/Bird", "Bird1.png")),
            pygame.image.load(os.path.join("Assets/Bird", "Bird2.png"))]
 
-nuvens = pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))
+nuvem = pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))
 
 fundo = pygame.image.load(os.path.join("Assets/Other", "Track.png"))
 
@@ -101,18 +103,73 @@ class Dino:
         tela.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
 
 
+class Nuvem:
+    def __init__(self):
+        self.x = tela_largura + random.randint(800, 1000)
+        self.y = random.randint(50, 100)
+        self.image = nuvem
+        self.largura = self.image.get_width()
+
+    def update(self):
+        self.x -= game_speed
+        if self.x < - self.largura:
+            self.x = tela_largura + random.randint(2500, 3000)
+            self.y = random.randint(50, 100)
+        pass
+
+    def draw(self, tela):
+        tela.blit(self.image, (self.x, self.y))
+
+
 def main():
+    global game_speed, x_pos_bg, y_pos_bg, pontos
     run = True
     relogio = pygame.time.Clock()
     player = Dino()
+    nuvem = Nuvem()
+    game_speed = 20
+    pontos = 0
+    font = pygame.font.Font('freesansbold.ttf', 20)
+    x_pos_bg = 0
+    y_pos_bg = 380
+
+    def pontuacao():
+        global pontos, game_speed
+        pontos += 1
+        if pontos % 100 == 0:
+            game_speed += 1
+
+        text = font.render("Pontos: " + str(pontos), True, (0, 0, 0))
+        textRect = text.get_rect()
+        textRect.center = (1000, 40)
+        tela.blit(text, textRect)
+
+    def background():
+        global x_pos_bg, y_pos_bg
+        image_largura = fundo.get_width()
+        tela.blit(fundo, (x_pos_bg, y_pos_bg))
+        tela.blit(fundo, (image_largura + x_pos_bg, y_pos_bg))
+        if x_pos_bg <= -image_largura:
+            tela.blit(fundo, (image_largura + x_pos_bg, y_pos_bg))
+            x_pos_bg = 0
+        x_pos_bg -= game_speed
+
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
         userInput = pygame.key.get_pressed()
         tela.fill((255, 255, 255))
+
         player.draw(tela)
         player.update(userInput)
+
+        nuvem.draw(tela)
+        nuvem.update()
+
+        background()
+
+        pontuacao()
 
         relogio.tick(30)
         pygame.display.update()
